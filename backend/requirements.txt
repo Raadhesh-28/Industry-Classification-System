@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+pydantic
+email-validator
+pydantic-settings
+multipart
+transformers
+torch
+python-docx
+pdfplumber
+scikit-learn
+pandas
+pytesseract
+pdf2image
