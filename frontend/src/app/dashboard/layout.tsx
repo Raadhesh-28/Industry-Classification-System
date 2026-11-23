@@ -1,16 +1,47 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
+import { useAuth } from '@/context/AuthContext';
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--background)' }}>
-      <Sidebar />
-      <div style={{ flex: 1, marginLeft: '240px', padding: '2rem 3rem' }}>
-        {children}
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace('/');
+    }
+  }, [loading, user, router]);
+
+  if (loading || !user) {
+    return (
+      <div
+        style={{
+          display: 'grid',
+          placeItems: 'center',
+          minBlockSize: '100dvh',
+          backgroundColor: 'var(--background)',
+          color: 'var(--text-muted)',
+          fontSize: '0.9rem',
+        }}
+      >
+        Loading...
       </div>
+    );
+  }
+
+  return (
+    <div className="dashboard-shell">
+      <Sidebar />
+      <main className="dashboard-main">
+        <div className="dashboard-container">{children}</div>
+      </main>
     </div>
   );
 }

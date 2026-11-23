@@ -1,41 +1,42 @@
+import logging
+from contextlib import asynccontextmanager
+
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
 
+from api.auth import router as auth_router
+from api.routers import router as core_router
 from core.config import settings
-from core.database import engine, Base
-from api.routers import router
-from services.ml_service import ml_service
-import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Create tables
-Base.metadata.create_all(bind=engine)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Load ML Model on startup
-    logger.info("Starting up ML Services...")
-    ml_service.load_model()
+    logger.info("Starting %s...", settings.PROJECT_NAME)
+    if settings.JWT_SECRET_KEY == "dev-insecure-secret-change-me-in-production":
+        logger.warning(
+            "Using default development JWT_SECRET_KEY. Set JWT_SECRET_KEY in backend/.env."
+        )
     yield
-    # Cleanup resources on shutdown
-    logger.info("Shutting down...")
+    logger.info("Shutting down %s...", settings.PROJECT_NAME)
+
 
 app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan)
 
-# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["X-Total-Count"],
 )
 
-app.include_router(router, prefix="/api")
+app.include_router(auth_router, prefix="/api")
+app.include_router(core_router, prefix="/api")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

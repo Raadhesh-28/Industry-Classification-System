@@ -1,20 +1,26 @@
-# Virtual environment
+# Python virtual environments & caches
 .venv/
 venv/
 env/
-
-# Python cache
 __pycache__/
 *.pyc
 *.pyo
+.pytest_cache/
 
-# Environment variables
+# Node / Next.js
+node_modules/
+.next/
+out/
+
+# Environment secrets
 .env
+backend/.env
+frontend/.env.local
+frontend/.env.*.local
 
-# IDE files
+# IDE & OS
 .vscode/
 .idea/
-
-# OS files
 .DS_Store
 Thumbs.db
+*.log
