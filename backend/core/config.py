@@ -28,9 +28,13 @@ class Settings(BaseSettings):
     @field_validator("DATABASE_URL", mode="before")
     @classmethod
     def normalize_database_url(cls, value: str) -> str:
-        # Cloud providers occasionally emit postgres:// instead of postgresql://
-        if isinstance(value, str) and value.startswith("postgres://"):
-            return value.replace("postgres://", "postgresql://", 1)
+        # Cloud providers occasionally emit postgres:// or postgresql+psycopg://;
+        # normalize to postgresql:// so SQLAlchemy uses the installed psycopg2-binary driver.
+        if isinstance(value, str):
+            if value.startswith("postgres://"):
+                return value.replace("postgres://", "postgresql://", 1)
+            if value.startswith("postgresql+psycopg://"):
+                return value.replace("postgresql+psycopg://", "postgresql://", 1)
         return value
 
     @field_validator("CORS_ORIGINS", mode="before")
